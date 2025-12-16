@@ -55,5 +55,10 @@ public class VideoStreamController {
         log.log(Level.INFO, "Resolve movie path = {0}", moviePath);
         return streamVideo(moviePath);
     }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> test(){
+        return ResponseEntity.ok().build();
+    }
 }
 
