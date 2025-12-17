@@ -11,4 +11,7 @@ target/
 # Environment
 .env
 
+# Videos
+*.xopp
+*.mp4
 

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Video Streaming Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+        :root {
+            --primary: #0a0746;
+            --secondary: #06b6d4;
+            --bg: #0f172a;
+            --card-bg: #020617;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Inter", system-ui, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #020617, #0f172a);
+            color: var(--text);
+            padding: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(79, 70, 229, 0.3);
+        }
+
+        .card-header {
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+            background: black;
+        }
+
+        .card-footer {
+            padding: 1rem;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>🎬 Video Library</h1>
+
+<div id="videoGrid" class="grid"></div>
+
+<script>
+    const API_URL = "http://localhost:8080/movie-info/list";
+    const STREAM_URL = "http://localhost:8080/stream/with-id/";
+
+    async function loadVideos() {
+        const response = await fetch(API_URL);
+        const videos = await response.json();
+
+        const grid = document.getElementById("videoGrid");
+        grid.innerHTML = "";
+
+        videos.forEach(video => {
+            const card = document.createElement("div");
+            card.className = "card";
+
+            card.innerHTML = `
+                <div class="card-header">${video.name}</div>
+                <video 
+                    controls 
+                    preload="metadata"
+                    data-id="${video.id}"
+                ></video>
+                <div class="card-footer">${video.description}</div>
+            `;
+
+            const videoElement = card.querySelector("video");
+            const videoSrc = STREAM_URL + video.id;
+
+            videoElement.src = videoSrc;
+
+            generateThumbnail(videoElement, videoSrc);
+
+            grid.appendChild(card);
+        });
+    }
+
+    function generateThumbnail(videoElement, src) {
+        const tempVideo = document.createElement("video");
+        tempVideo.src = src;
+        tempVideo.muted = true;
+        tempVideo.preload = "metadata";
+        tempVideo.crossOrigin = "anonymous";
+
+        tempVideo.addEventListener("loadedmetadata", () => {
+            tempVideo.currentTime = Math.min(2, tempVideo.duration / 2);
+        });
+
+        tempVideo.addEventListener("seeked", () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = tempVideo.videoWidth;
+            canvas.height = tempVideo.videoHeight;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(tempVideo, 0, 0, canvas.width, canvas.height);
+
+            videoElement.poster = canvas.toDataURL("image/png");
+            tempVideo.remove();
+        });
+    }
+
+    loadVideos();
+</script>
+
+</body>
+</html>
