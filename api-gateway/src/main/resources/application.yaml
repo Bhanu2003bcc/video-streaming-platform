@@ -4,6 +4,30 @@ spring:
 
   cloud:
     gateway:
+
+      # 🔑 FIX: REMOVE DUPLICATE CORS HEADERS
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+
+      # GLOBAL CORS (ONLY HERE)
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - http://127.0.0.1:5500
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - Authorization
+              - Content-Type
+              - Range
+            allowCredentials: false
+
       routes:
         - id: movie-catalog-service
           uri: lb://movie-catalog-service
@@ -23,4 +47,3 @@ eureka:
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
-    reactor.netty.http.client: DEBUG
