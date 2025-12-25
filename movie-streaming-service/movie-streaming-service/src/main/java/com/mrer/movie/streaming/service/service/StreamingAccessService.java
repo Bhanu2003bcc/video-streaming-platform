@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.nio.file.AccessDeniedException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class StreamingAccessService {
@@ -23,14 +24,14 @@ public class StreamingAccessService {
     }
 
     public StreamResponse generateStreamUrl(
-            String movieId,
+            UUID movieId,
             String userId,
             String role) throws AccessDeniedException {
 
         permissionChecker.check(movieId, userId, role);
 
         String signedUrl =
-                signedUrlGenerator.generate(movieId, Duration.ofMinutes(10));
+                signedUrlGenerator.generate(String.valueOf(movieId), Duration.ofMinutes(10));
 
         return new StreamResponse(
                 signedUrl,

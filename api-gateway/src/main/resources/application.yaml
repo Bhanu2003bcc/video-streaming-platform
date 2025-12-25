@@ -29,6 +29,11 @@ spring:
             allowCredentials: false
 
       routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
+
         - id: movie-catalog-service
           uri: lb://movie-catalog-service
           predicates:
@@ -37,7 +42,10 @@ spring:
         - id: movie-streaming-service
           uri: lb://movie-streaming-service
           predicates:
-            - Path=/stream/**
+#            - Path=/stream/**
+            - Path=/api/v1/stream/**
+          filters:
+            - StripPrefix=2
 
 eureka:
   client:
@@ -47,3 +55,6 @@ eureka:
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
+
+jwt:
+  secret: "2652320e9a23e089a077b4b781cd710d553c767af61bb523d8281fdee6f0d5bd"

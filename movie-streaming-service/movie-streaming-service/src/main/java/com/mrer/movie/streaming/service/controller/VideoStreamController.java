@@ -18,8 +18,10 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 @RestController
 @RequestMapping
+
 public class VideoStreamController {
 
     @Autowired
@@ -34,45 +36,47 @@ public class VideoStreamController {
     public VideoStreamController(StreamingAccessService streamingService) {
         this.streamingService = streamingService;
     }
-
-    @GetMapping("/stream/{videoPath}")
-    public ResponseEntity<InputStreamResource> streamVideo(
-            @PathVariable String videoPath) throws FileNotFoundException {
-
-        File file = Paths.get(VIDEO_DIRECTORY, videoPath).toFile();
-
-        System.out.println("Resolved path: " + file.getAbsolutePath());
-
-        if(file.exists()){
-            InputStreamResource inputStreamResource =
-                    new InputStreamResource(new FileInputStream(file));
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType("video/mp4"))
-                    .body(inputStreamResource);
-        }else{
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/stream/with-id/{videoInfoId}")
-    public ResponseEntity<InputStreamResource> streamVideoById(
-            @PathVariable UUID videoInfoId) throws FileNotFoundException {
-        String moviePath = movieCatalogService.getMoviePath(videoInfoId);
-        log.log(Level.INFO, "Resolve movie path = {0}", moviePath);
-        return streamVideo(moviePath);
-    }
-
-    @GetMapping("/test")
-    public ResponseEntity<?> test(){
-        return ResponseEntity.ok().build();
-    }
+//
+//    @GetMapping("/stream/{videoPath}")
+//    public ResponseEntity<InputStreamResource> streamVideo(
+//            @PathVariable String videoPath) throws FileNotFoundException {
+//
+//        File file = Paths.get(VIDEO_DIRECTORY, videoPath).toFile();
+//
+//        System.out.println("Resolved path: " + file.getAbsolutePath());
+//
+//        if(file.exists()){
+//            InputStreamResource inputStreamResource =
+//                    new InputStreamResource(new FileInputStream(file));
+//            return ResponseEntity.ok()
+//                    .contentType(MediaType.parseMediaType("video/mp4"))
+//                    .body(inputStreamResource);
+//        }else{
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+//
+//    @GetMapping("/stream/with-id/{videoInfoId}")
+//    public ResponseEntity<InputStreamResource> streamVideoById(
+//            @PathVariable UUID videoInfoId) throws FileNotFoundException {
+//        String moviePath = movieCatalogService.getMoviePath(videoInfoId);
+//        log.log(Level.INFO, "Resolve movie path = {0}", moviePath);
+//        return streamVideo(moviePath);
+//    }
+//
+//    @GetMapping("/test")
+//    public ResponseEntity<?> test(){
+//        return ResponseEntity.ok().build();
+//    }
 
     // For short time url
     @GetMapping("/stream/{movieId}")
     public ResponseEntity<StreamResponse> stream(
-            @PathVariable String movieId,
+            @PathVariable UUID movieId,
             @RequestHeader("X-USER-ID") String userId,
             @RequestHeader("X-USER-ROLE") String role) throws AccessDeniedException {
+        System.out.println("Headers userId={}, role={}"+ userId+ role);
+
 
         StreamResponse response =
                 streamingService.generateStreamUrl(movieId, userId, role);
